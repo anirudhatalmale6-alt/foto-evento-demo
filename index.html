@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galería Privada — Venta de Fotos (Demo)</title>
+<style>
+:root{
+  --bg:#0e1015; --panel:#161a22; --panel2:#1d222c; --line:#2a3140;
+  --txt:#eef1f6; --muted:#9aa4b5; --accept:#7c5cff; --accept2:#00d1b2;
+  --yape:#742284; --gold:#e8c17a; --danger:#ff5d6c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.badge{display:inline-block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:5px 10px;border-radius:999px}
+
+/* Top bar */
+header.top{position:sticky;top:0;z-index:40;background:rgba(14,16,21,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em}
+.logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accept),var(--accept2));display:flex;align-items:center;justify-content:center;font-size:15px}
+.top .spacer{flex:1}
+.evtag{font-size:13px;color:var(--muted)}
+.cartbtn{position:relative;background:var(--accept);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:14px}
+.cartbtn:hover{filter:brightness(1.08)}
+.cartbtn .count{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#211a08;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+
+/* Access gate */
+.gate{position:fixed;inset:0;z-index:60;background:radial-gradient(1200px 700px at 70% -10%,#20263a,#0b0d12 60%);display:flex;align-items:center;justify-content:center;padding:20px}
+.gate .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:420px;width:100%;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.gate h1{font-size:22px;margin:14px 0 6px}
+.gate p{color:var(--muted);font-size:14px;margin:0 0 22px;line-height:1.5}
+.field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;letter-spacing:.05em;text-transform:uppercase}
+.pinrow{display:flex;gap:10px}
+.pinrow input{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:14px 16px;font-size:22px;letter-spacing:.4em;text-align:center;font-weight:700}
+.pinrow input:focus{outline:none;border-color:var(--accept)}
+.btn{background:var(--accept);color:#fff;border:none;border-radius:12px;padding:14px 18px;font-weight:700;cursor:pointer;font-size:15px;width:100%;margin-top:16px}
+.btn:hover{filter:brightness(1.08)}
+.hint{font-size:12px;color:var(--muted);margin-top:14px;text-align:center}
+.hint b{color:var(--gold)}
+.err{color:var(--danger);font-size:13px;margin-top:10px;min-height:16px}
+
+/* Event hero */
+.hero{padding:30px 0 8px}
+.hero h2{font-size:26px;margin:12px 0 6px}
+.hero .meta{color:var(--muted);font-size:14px}
+.pricepills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px}
+.pill b{color:var(--gold)}
+
+/* Gallery */
+.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:22px 0 120px}
+@media(max-width:900px){.gallery{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.gallery{grid-template-columns:repeat(2,1fr)}}
+.cell{position:relative;border-radius:12px;overflow:hidden;background:var(--panel2);aspect-ratio:3/2;cursor:pointer;border:2px solid transparent}
+.cell img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.cell:hover img{transform:scale(1.05)}
+.cell .code{position:absolute;left:8px;bottom:8px;font-size:11px;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:6px;color:#dfe4ee}
+.cell .pick{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);border:2px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+.cell.sel{border-color:var(--accept2)}
+.cell.sel .pick{background:var(--accept2);border-color:var(--accept2)}
+.cell.sel::after{content:"";position:absolute;inset:0;background:rgba(0,209,178,.14)}
+
+/* Lightbox */
+.lb{position:fixed;inset:0;z-index:70;background:rgba(6,7,10,.94);display:none;align-items:center;justify-content:center;padding:16px}
+.lb.open{display:flex}
+.lb .inner{max-width:1000px;width:100%;text-align:center}
+.lb img{max-width:100%;max-height:74vh;border-radius:12px}
+.lb .bar{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:none;color:#fff;font-size:26px;width:48px;height:48px;border-radius:50%;cursor:pointer}
+.lb .prev{left:14px}.lb .next{right:14px}
+.lb .close{position:absolute;top:14px;right:16px;background:none;border:none;color:#fff;font-size:30px;cursor:pointer}
+.togglebuy{background:var(--accept2);color:#04231d;border:none;border-radius:10px;padding:12px 20px;font-weight:800;cursor:pointer;font-size:15px}
+.togglebuy.on{background:var(--danger);color:#fff}
+
+/* Cart drawer */
+.drawer{position:fixed;top:0;right:0;height:100%;width:400px;max-width:92vw;background:var(--panel);border-left:1px solid var(--line);z-index:80;transform:translateX(100%);transition:transform .28s;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer h3{margin:0;font-size:17px}
+.drawer .dh{display:flex;align-items:center;justify-content:space-between;padding:18px 18px;border-bottom:1px solid var(--line)}
+.drawer .x{background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+.drawer .body{flex:1;overflow:auto;padding:14px 18px}
+.pkgs{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.pkg{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}
+.pkg small{color:var(--muted);display:block}
+.li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.li img{width:56px;height:40px;object-fit:cover;border-radius:6px}
+.li .rm{margin-left:auto;background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 0}
+.foot{border-top:1px solid var(--line);padding:16px 18px}
+.rowt{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.rowt.total{font-size:20px;font-weight:800}
+.rowt.total b{color:var(--gold)}
+.disc{color:var(--accept2);font-size:13px}
+.checkout{background:linear-gradient(135deg,var(--yape),#a13cb8);color:#fff;border:none;border-radius:12px;padding:15px;font-weight:800;cursor:pointer;width:100%;margin-top:12px;font-size:15px}
+
+/* Overlay */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:75;display:none}
+.ov.open{display:block}
+
+/* Yape modal */
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,7,10,.8)}
+.modal.open{display:flex}
+.modal .m{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:440px;width:100%;padding:26px;max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 4px}
+.yapehead{display:flex;align-items:center;gap:12px;background:var(--yape);border-radius:12px;padding:14px;margin:14px 0}
+.yapehead .yl{width:44px;height:44px;border-radius:12px;background:#fff;color:var(--yape);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}
+.steps{counter-reset:s;margin:8px 0 0;padding:0;list-style:none}
+.steps li{position:relative;padding:10px 0 10px 40px;font-size:14px;color:#d6dbe6;border-bottom:1px solid var(--line)}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--gold)}
+.upl{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:13px;margin-top:12px;cursor:pointer}
+.mfoot{display:flex;gap:10px;margin-top:16px}
+.mfoot button{flex:1;border-radius:10px;padding:13px;font-weight:700;cursor:pointer;border:none;font-size:14px}
+.gh{background:var(--panel2);color:var(--txt);border:1px solid var(--line)!important}
+.gp{background:var(--accept2);color:#04231d}
+.ok{text-align:center;padding:8px 0}
+.ok .ring{width:64px;height:64px;border-radius:50%;background:rgba(0,209,178,.15);color:var(--accept2);display:flex;align-items:center;justify-content:center;font-size:34px;margin:6px auto 12px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+footer.foota{border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center;padding:22px 0}
+.demoflag{background:var(--gold);color:#211a08;font-size:12px;font-weight:700;text-align:center;padding:7px}
+</style>
+</head>
+<body>
+
+<div class="demoflag">DEMO — Prototipo de galería para venta de fotos. Fotos y precios de muestra. La marca de agua usará tu logotipo real.</div>
+
+<!-- ACCESS GATE -->
+<div class="gate" id="gate">
+  <div class="card">
+    <span class="badge">Galería privada</span>
+    <h1>Promoción 2025 — Colegio San Martín</h1>
+    <p>Esta galería es privada. Ingresa el PIN que te compartió el fotógrafo para ver tus fotos.</p>
+    <div class="field">
+      <label>PIN de acceso</label>
+      <div class="pinrow">
+        <input id="pin" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off">
+      </div>
+    </div>
+    <div class="err" id="pinerr"></div>
+    <button class="btn" id="enter">Ver mi galería</button>
+    <div class="hint">PIN de demostración: <b>2025</b></div>
+  </div>
+</div>
+
+<!-- TOP -->
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><div class="logo">📷</div> FotoEvento</div>
+    <span class="evtag">Promoción 2025 · San Martín</span>
+    <div class="spacer"></div>
+    <button class="cartbtn" id="openCart">Mi selección <span class="count" id="count">0</span></button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap hero">
+  <span class="badge">Galería del evento</span>
+  <h2>Promoción 2025 — Colegio San Martín</h2>
+  <div class="meta">Ceremonia de graduación · 12 fotos en esta demo (en el sistema real: miles por evento)</div>
+  <div class="pricepills" id="pricepills"></div>
+</div>
+
+<!-- GALLERY -->
+<div class="wrap">
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb">
+  <button class="close" id="lbClose">×</button>
+  <button class="nav prev" id="lbPrev">‹</button>
+  <button class="nav next" id="lbNext">›</button>
+  <div class="inner">
+    <img id="lbImg" src="" alt="">
+    <div class="bar">
+      <span class="badge" id="lbCode"></span>
+      <button class="togglebuy" id="lbBuy">Agregar a mi selección</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="ov" id="ov"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><h3>Mi selección</h3><button class="x" id="closeCart">×</button></div>
+  <div class="body">
+    <div class="pkgs" id="pkgs"></div>
+    <div id="items"></div>
+  </div>
+  <div class="foot">
+    <div class="rowt"><span>Fotos seleccionadas</span><span id="qty">0</span></div>
+    <div class="rowt"><span>Subtotal</span><span id="subtotal">S/ 0.00</span></div>
+    <div class="rowt disc" id="discRow" style="display:none"><span id="discLabel">Paquete aplicado</span><span id="discVal">- S/ 0.00</span></div>
+    <div class="rowt total"><span>Total</span><b id="total">S/ 0.00</b></div>
+    <button class="checkout" id="checkout">Pagar con Yape</button>
+  </div>
+</aside>
+
+<!-- YAPE MODAL -->
+<div class="modal" id="modal">
+  <div class="m" id="modalBody"></div>
+</div>
+
+<footer class="foota">
+  Prototipo desarrollado para el proyecto — Plataforma de venta de fotos tipo Wfolio · Flujo: vista con marca de agua → selección → pago Yape → descarga tras aprobación.
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
